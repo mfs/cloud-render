@@ -1,0 +1,72 @@
+#!/usr/bin/bash
+
+set -e
+
+if [[ $# -lt 1 ]]; then
+	echo "usage: $(basename "$0") scene.blend <OPTIONS>"
+	exit 1
+fi
+
+if [[ ! -f $1 ]]; then
+	echo "error: $1: file not found"
+	exit 1
+fi
+
+# shellcheck source=/dev/null
+source ~/.config/cloud-render-rc
+
+TIMESTAMP=$(date +%Y-%m-%d-%H%M)
+
+BLEND_FILE=$1
+shift
+BLEND_OPT=$*
+
+echo ":: Uploading blend file"
+aws s3 cp --quiet "$BLEND_FILE" "s3://$CR_S3_BUCKET/$TIMESTAMP/$BLEND_FILE"
+
+RENDER_SCRIPT="#!/usr/bin/bash
+
+sudo -i -u ec2-user bash << EOF
+
+aws s3 cp s3://$CR_S3_BUCKET/$TIMESTAMP/$BLEND_FILE .
+
+~/blender-2.83.2-linux64/blender -b $BLEND_FILE -o output/frame_####.png ${BLEND_OPT:-"-f 1"} > render.log
+
+aws s3 cp --recursive output/ s3://$CR_S3_BUCKET/$TIMESTAMP/render/
+aws s3 cp render.log s3://$CR_S3_BUCKET/$TIMESTAMP/
+
+EOF
+
+shutdown -h now"
+
+USER_DATA=$(echo -n "$RENDER_SCRIPT" | base64 -w 0)
+
+aws ec2 request-spot-instances --launch-specification \
+  "{ \
+  \"ImageId\": \"$CR_AMI\", \
+  \"KeyName\": \"$CR_KEY\", \
+  \"SecurityGroupIds\": [ \"$CR_SECURITY_GROUP\" ], \
+  \"InstanceType\": \"$CR_INSTANCE_TYPE\", \
+  \"IamInstanceProfile\": { \
+      \"Arn\": \"$CR_IAM_INSTANCE_PROFILE\" \
+  }, \
+  \"UserData\": \"$USER_DATA\" \
+}" &> /dev/null
+
+# wait for render log to appear
+# could ssh to the instance and tail the log file too
+echo -n ":: Rendering "
+until aws s3 ls "s3://$CR_S3_BUCKET/$TIMESTAMP/render.log" &> /dev/null ; do
+    echo -n "."
+    sleep 60
+done
+echo
+
+# copy completed render from S3
+echo ":: Downloading rendering artifacts"
+mkdir -p "$TIMESTAMP/render"
+aws s3 cp --quiet "s3://$CR_S3_BUCKET/$TIMESTAMP/render.log" "$TIMESTAMP/"
+aws s3 cp --quiet --recursive "s3://$CR_S3_BUCKET/$TIMESTAMP/render/" "$TIMESTAMP/render/"
+
+
+
