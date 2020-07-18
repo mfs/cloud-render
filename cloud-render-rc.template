@@ -3,4 +3,4 @@ CR_AMI=ami-xxxxxxxxxxxxxxxxx
 CR_KEY=ssh-key
 CR_SECURITY_GROUP=sg-xxxxxxxxxxxxxxxxx
 CR_INSTANCE_TYPE=c5.9xlarge
-CR_IAM_INSTANCE_PROFILE=arn:aws:iam::xxxxxxxxxxxx:instance-profile/render-profile
+CR_IAM_INSTANCE_PROFILE=arn:aws:iam::xxxxxxxxxxxx:instance-profile/cloud-render
