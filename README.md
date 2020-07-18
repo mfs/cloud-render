@@ -82,6 +82,10 @@ be passed to Blender.
     ./cloud-render scene.blend -f 1 # same as the above example
     ./cloud-render scene.blend -a   # render animation as separate images
 
+The original `.blend` file and the rendering artifacts are stored in S3 and
+downloaded when complete. They are left in S3 if they need to be downloaded
+again in future.
+
 ## TODO
 
 - [ ] Add support for tweaking rendering settings via Python API.
