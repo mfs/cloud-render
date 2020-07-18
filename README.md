@@ -1,4 +1,4 @@
-# ClOUD-RENDER
+# CLOUD-RENDER
 
 ## Note
 
@@ -41,7 +41,7 @@ description of them.
 |CR_INSTANCE_TYPE| Instance type. e.g. `c5.9xlarge`|
 |CR_IAM_INSTANCE_PROFILE| Instance profile giving instance access to the above S3 bucket. e.g. `arn:aws:iam::xxxxxxxxxxxx:instance-profile/cloud-render` |
 
-## AMI Preperation
+## AMI Preparation
 
 A packer script is supplied that will create an AMI using Amazon Linux 2 and
 Blender 2.83.2. To build use the following commands from this directory:
@@ -58,20 +58,32 @@ security group you can use. If not, a BASH script is supplied that will
 create:
 
 - An IAM role, `cloud-render` with a policy document allowing access to the `CR_S3_BUCKET`
-- An Inatance Profile, `cloud-render` that uses the above IAM role.
+- An Instance Profile, `cloud-render` that uses the above IAM role.
 - A security group, `cloud-render`, that allows SSH in from *all* IPv4 addresses.
 
 You may wish to use an alternative security group that is locked down to your
 IP address.
 
-To use the supplied BASH script execute the folowing commands from this
+To use the supplied BASH script execute the following commands from this
 directory:
 
     cd aws
     ./create-iam-role-sg.sh
 
+## Usage
+
+To render setup your scene to use Cycles and call the script as follows:
+
+    ./cloud-render scene.blend
+
+This will render the first frame as a single image. Any further arguments will
+be passed to Blender.
+
+   ./cloud-render scene.blend -f 1 # same as the above example
+   ./cloud-render scene.blend -a   # render animation as separate images
+
 ## TODO
 
 - [ ] Add support for tweaking rendering settings via Python API.
 - [ ] Support multiple Blender versions.
-- [ ] Tigheten up some of the permissions in the IAM profile.
+- [ ] Tighten up some of the permissions in the IAM profile.
