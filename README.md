@@ -79,8 +79,8 @@ To render setup your scene to use Cycles and call the script as follows:
 This will render the first frame as a single image. Any further arguments will
 be passed to Blender.
 
-   ./cloud-render scene.blend -f 1 # same as the above example
-   ./cloud-render scene.blend -a   # render animation as separate images
+    ./cloud-render scene.blend -f 1 # same as the above example
+    ./cloud-render scene.blend -a   # render animation as separate images
 
 ## TODO
 
