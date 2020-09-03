@@ -21,6 +21,8 @@ BLEND_FILE=$1
 shift
 BLEND_OPT=$*
 
+BLEND_VER=2.90.0
+
 echo ":: Uploading blend file"
 aws s3 cp --quiet "$BLEND_FILE" "s3://$CR_S3_BUCKET/$TIMESTAMP/$BLEND_FILE"
 
@@ -30,7 +32,7 @@ sudo -i -u ec2-user bash << EOF
 
 aws s3 cp s3://$CR_S3_BUCKET/$TIMESTAMP/$BLEND_FILE .
 
-~/blender-2.83.2-linux64/blender -b $BLEND_FILE -o output/frame_####.png ${BLEND_OPT:-"-f 1"} > render.log
+~/blender-$BLEND_VER-linux64/blender -b $BLEND_FILE -o output/frame_####.png ${BLEND_OPT:-"-f 1"} > render.log
 
 aws s3 cp --recursive output/ s3://$CR_S3_BUCKET/$TIMESTAMP/render/
 aws s3 cp render.log s3://$CR_S3_BUCKET/$TIMESTAMP/
