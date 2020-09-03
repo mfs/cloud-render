@@ -44,7 +44,7 @@ description of them.
 ## AMI Preparation
 
 A packer script is supplied that will create an AMI using Amazon Linux 2 and
-Blender 2.83.2. To build use the following commands from this directory:
+Blender 2.90.0. To build use the following commands from this directory:
 
     cd packer
     packer build amazon-linux-2-blender.json
